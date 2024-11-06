@@ -1,0 +1,23 @@
+from django.contrib import admin
+from .models import Subscriber, Group, Firm, FirmGroup, FirmUser, Label, FirmUserLabel, FirmUserGroup, Invite, IntakeForm, CheckoutSession, LegalMatterKind, LegalMatter, LegalMatterIntakeData, Task, CalendarEvent, CalendarEventParticipant, Note, Document, DocumentLink
+
+admin.site.register(Subscriber)
+admin.site.register(Group)
+admin.site.register(Firm)
+admin.site.register(FirmGroup)
+admin.site.register(FirmUser)
+admin.site.register(Label)
+admin.site.register(FirmUserLabel)
+admin.site.register(FirmUserGroup)
+admin.site.register(Invite)
+admin.site.register(IntakeForm)
+admin.site.register(CheckoutSession)
+admin.site.register(LegalMatterKind)
+admin.site.register(LegalMatter)
+admin.site.register(LegalMatterIntakeData)
+admin.site.register(Task)
+admin.site.register(CalendarEvent)
+admin.site.register(CalendarEventParticipant)
+admin.site.register(Note)
+admin.site.register(Document)
+admin.site.register(DocumentLink)
