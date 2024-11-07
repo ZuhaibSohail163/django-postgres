@@ -15,7 +15,7 @@ class Subscriber(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'subscriber'
+        db_table = 'subscribers'
 
 
 class Group(models.Model):
@@ -26,9 +26,9 @@ class Group(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'group'
+        db_table = 'groups'
 
-
+us_counties
 class Firm(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -40,7 +40,7 @@ class Firm(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'firm'
+        db_table = 'firms'
 
 
 class FirmGroup(models.Model):
@@ -49,7 +49,7 @@ class FirmGroup(models.Model):
     group_id = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'firmgroup'
+        db_table = 'firm_groups'
 
 
 class FirmUser(models.Model):
@@ -67,7 +67,7 @@ class FirmUser(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'firmuser'
+        db_table = 'firm_users'
 
 
 class Label(models.Model):
@@ -76,7 +76,7 @@ class Label(models.Model):
     value = models.CharField(max_length=255)
 
     class Meta:
-        db_table = 'label'
+        db_table = 'labels'
 
 
 class FirmUserLabel(models.Model):
@@ -85,7 +85,7 @@ class FirmUserLabel(models.Model):
     label_id = models.ForeignKey(Label, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'firmuserlabel'
+        db_table = 'firm_user_labels'
 
 
 class FirmUserGroup(models.Model):
@@ -94,7 +94,7 @@ class FirmUserGroup(models.Model):
     group_id = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'firmusergroup'
+        db_table = 'firm_user_groups'
 
 
 class Invite(models.Model):
@@ -115,7 +115,7 @@ class Invite(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'invite'
+        db_table = 'invites'
 
 
 class IntakeForm(models.Model):
@@ -126,7 +126,7 @@ class IntakeForm(models.Model):
     form_version = models.CharField(max_length=255)
 
     class Meta:
-        db_table = 'intakeform'
+        db_table = 'intake_forms'
 
 
 class CheckoutSession(models.Model):
@@ -140,7 +140,7 @@ class CheckoutSession(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'checkoutsession'
+        db_table = 'checkout_sessions'
 
 
 class LegalMatterKind(models.Model):
@@ -152,7 +152,7 @@ class LegalMatterKind(models.Model):
     products = models.JSONField(default=list)
 
     class Meta:
-        db_table = 'legalmatterkind'
+        db_table = 'legal_matter_kinds'
 
 
 class LegalMatter(models.Model):
@@ -177,7 +177,7 @@ class LegalMatter(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'legalmatter'
+        db_table = 'legal_matters'
 
 
 class LegalMatterIntakeData(models.Model):
@@ -186,7 +186,7 @@ class LegalMatterIntakeData(models.Model):
     intake_form_id = models.ForeignKey(IntakeForm, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'legalmatterintakedata'
+        db_table = 'legal_matter_intake_data'
 
 
 class Task(models.Model):
@@ -209,7 +209,7 @@ class Task(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'task'
+        db_table = 'tasks'
 
 
 class CalendarEvent(models.Model):
@@ -224,7 +224,7 @@ class CalendarEvent(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'calendarevent'
+        db_table = 'calendar_events'
 
 
 class CalendarEventParticipant(models.Model):
@@ -234,7 +234,7 @@ class CalendarEventParticipant(models.Model):
     participant_subscriber_ref = models.ForeignKey(Subscriber, null=True, blank=True, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'calendareventparticipant'
+        db_table = 'calendar_event_participants'
 
 
 class Note(models.Model):
@@ -248,7 +248,7 @@ class Note(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'note'
+        db_table = 'notes'
 
 
 class Document(models.Model):
@@ -264,7 +264,7 @@ class Document(models.Model):
     acl = models.JSONField(default=dict)
 
     class Meta:
-        db_table = 'document'
+        db_table = 'documents'
 
 
 class DocumentLink(models.Model):
