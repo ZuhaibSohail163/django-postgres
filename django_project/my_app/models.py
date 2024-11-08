@@ -211,7 +211,11 @@ class LegalMatterKind(models.Model):
     description = models.TextField(null=True, blank=True)
     intake_form = models.CharField(max_length=100)
     name = models.CharField(max_length=255)
-    products = models.JSONField(default=list)
+    products = ArrayField(
+        models.TextField(),  # Field type for the array elements
+        default=list,  # Python default for empty array
+        db_default="{}::text[]"  # Ensures it generates as text[] with the proper default
+    )
 
     class Meta:
         db_table = 'legal_matter_kinds'
@@ -233,7 +237,7 @@ class LegalMatter(models.Model):
     rejection_reason = models.TextField(null=True, blank=True)
     withdraw_reason = models.TextField(null=True, blank=True)
     referral_rejected_reason = models.TextField(null=True, blank=True)
-    rating = models.IntegerField(default=0)
+    rating = models.IntegerField(db_default=0)
     kind_ref = models.ForeignKey('LegalMatterKind', on_delete=models.RESTRICT, db_column='kind_ref')
     subscriber_ref = models.ForeignKey('Subscriber', on_delete=models.RESTRICT, db_column='subscriber_ref')
     assigned_lawyer_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.RESTRICT, db_column='assigned_lawyer_ref')
@@ -264,7 +268,7 @@ class Task(models.Model):
     created_timestamp = DateTimeField()
     last_updated_timestamp = DateTimeField()
     completed_timestamp = DateTimeField(null=True, blank=True)
-    tracked_minutes = models.IntegerField(default=0)
+    tracked_minutes = models.IntegerField(db_default=0)
     assigned_to_firm_user_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.RESTRICT, related_name='tasks_assigned_to_firm_user', db_column='assigned_to_firm_user_ref')
     assigned_to_subscriber_ref = models.ForeignKey('Subscriber', null=True, blank=True, on_delete=models.RESTRICT, related_name='tasks_assigned_to_subscriber', db_column='assigned_to_subscriber_ref')
     status = models.CharField(max_length=50)
@@ -274,7 +278,7 @@ class Task(models.Model):
     description = models.TextField(null=True, blank=True)
     charge_type = models.CharField(max_length=20, null=True, blank=True)
     charge_reason = models.TextField(null=True, blank=True)
-    charge_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    charge_amount = models.DecimalField(max_digits=10, decimal_places=2, db_default=0)
     acl = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
@@ -413,8 +417,16 @@ class PaymentProcessorAccount(models.Model):
     type = models.CharField(max_length=50)
     capabilities_card_payments = models.CharField(max_length=50)
     capabilities_transfers = models.CharField(max_length=50)
-    requirements_errors = models.JSONField(default=list)
-    requirements_pending_verification = models.JSONField(default=list)
+    requirements_errors = ArrayField(
+        models.TextField(),  # Field type for the array elements
+        default=list,  # Python default for empty array
+        db_default="{}::text[]"  # Ensures it generates as text[] with the proper default
+    )
+    requirements_pending_verification = ArrayField(
+        models.TextField(),  # Field type for the array elements
+        default=list,  # Python default for empty array
+        db_default="{}::text[]"  # Ensures it generates as text[] with the proper default
+    )
     requirements_current_deadline = DateTimeField(null=True, blank=True)
     requirements_disabled_reason = models.TextField(null=True, blank=True)
     firm_ref = models.ForeignKey('Firm', on_delete=models.CASCADE, db_column='firm_ref')
@@ -500,7 +512,11 @@ class USState(models.Model):
 # UserMessage model
 class UserMessage(models.Model):
     id = models.BigAutoField(primary_key=True)
-    labels = models.JSONField(default=list)
+    labels = ArrayField(
+        models.TextField(),  # Field type for the array elements
+        default=list,  # Python default for empty array
+        db_default="{}::text[]"  # Ensures it generates as text[] with the proper default
+    )
     created_timestamp = DateTimeField()
     severity = models.CharField(max_length=50)
     firm_user_ref = models.ForeignKey(
