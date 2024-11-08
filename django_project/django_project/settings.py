@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 # Application definition
 
 INSTALLED_APPS = [
-    "console_project",
+    "django.contrib.postgres",
+    "my_app",
 ]
 
 
