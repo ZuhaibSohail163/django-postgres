@@ -1,7 +1,6 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.contrib.postgres.indexes import GinIndex, OpClass
-from .custom import DateTimeWithoutTZField as DateTimeField
+from django.contrib.postgres.indexes import GinIndex
 
 
 # Subscriber model
@@ -9,7 +8,7 @@ class Subscriber(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
     last_name = models.CharField(max_length=255)
     gender = models.CharField(max_length=50, null=True, blank=True)
-    last_updated_timestamp = DateTimeField()
+    last_updated_timestamp = models.DateTimeField()
     email = models.CharField(max_length=255, unique=True)
     subscription_active = models.BooleanField()
     roles = ArrayField(
@@ -81,7 +80,7 @@ class FirmUser(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
     last_name = models.CharField(max_length=255)
     email = models.CharField(max_length=255, unique=True)
-    last_updated_timestamp = DateTimeField()
+    last_updated_timestamp = models.DateTimeField()
     number_of_assigning_legal_matters = models.IntegerField(db_default=0)
     number_of_assigned_legal_matters = models.IntegerField(db_default=0)
     roles = ArrayField(
@@ -144,11 +143,11 @@ class Invite(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
     user_type = models.CharField(max_length=50)
     status = models.CharField(max_length=50)
-    created_timestamp = DateTimeField()
-    last_updated_timestamp = DateTimeField()
+    created_timestamp = models.DateTimeField()
+    last_updated_timestamp = models.DateTimeField()
     email = models.CharField(max_length=255)
     firm_user_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.SET_NULL, related_name='invites_as_user', db_column='firm_user_ref')
-    expires_at = DateTimeField()
+    expires_at = models.DateTimeField()
     firm_admin_ref = models.ForeignKey('FirmUser', on_delete=models.CASCADE, related_name='invites_as_admin', db_column='firm_admin_ref')
     user_name = models.CharField(max_length=255)
     firm_ref = models.ForeignKey('Firm', on_delete=models.CASCADE, db_column='firm_ref')
@@ -157,7 +156,7 @@ class Invite(models.Model):
         blank=True,  # Optional: allows the array to be empty
         null=False    # Optional: allows the array to be null
     )
-    withdrawn_timestamp = DateTimeField(null=True, blank=True)
+    withdrawn_timestamp = models.DateTimeField(null=True, blank=True)
     withdrawn_reason = models.TextField(null=True, blank=True)
     acl = models.JSONField(default=dict, db_default='{}')
 
@@ -177,8 +176,8 @@ class Invite(models.Model):
 class IntakeForm(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
     data = models.JSONField()
-    last_updated_timestamp = DateTimeField()
-    created_timestamp = DateTimeField()
+    last_updated_timestamp = models.DateTimeField()
+    created_timestamp = models.DateTimeField()
     form_version = models.CharField(max_length=255)
 
     class Meta:
@@ -190,8 +189,8 @@ class IntakeForm(models.Model):
 # CheckoutSession model
 class CheckoutSession(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
-    expires_at = DateTimeField()
-    created = DateTimeField()
+    expires_at = models.DateTimeField()
+    created = models.DateTimeField()
     amount_subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     amount_total = models.DecimalField(max_digits=10, decimal_places=2)
     url = models.TextField()
@@ -214,7 +213,7 @@ class LegalMatterKind(models.Model):
     products = ArrayField(
         models.TextField(),  # Field type for the array elements
         default=list,  # Python default for empty array
-        db_default="{}::text[]"  # Ensures it generates as text[] with the proper default
+        db_default="{}"  # Ensures it generates as text[] with the proper default
     )
 
     class Meta:
@@ -224,16 +223,16 @@ class LegalMatterKind(models.Model):
 # LegalMatter model
 class LegalMatter(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
-    created_timestamp = DateTimeField()
+    created_timestamp = models.DateTimeField()
     status = models.CharField(max_length=50)
-    assigned_timestamp = DateTimeField(null=True, blank=True)
-    accepted_timestamp = DateTimeField(null=True, blank=True)
-    referral_timestamp = DateTimeField(null=True, blank=True)
-    referral_accepted_timestamp = DateTimeField(null=True, blank=True)
-    referral_rejected_timestamp = DateTimeField(null=True, blank=True)
-    closed_timestamp = DateTimeField(null=True, blank=True)
-    canceled_timestamp = DateTimeField(null=True, blank=True)
-    withdrawn_timestamp = DateTimeField(null=True, blank=True)
+    assigned_timestamp = models.DateTimeField(null=True, blank=True)
+    accepted_timestamp = models.DateTimeField(null=True, blank=True)
+    referral_timestamp = models.DateTimeField(null=True, blank=True)
+    referral_accepted_timestamp = models.DateTimeField(null=True, blank=True)
+    referral_rejected_timestamp = models.DateTimeField(null=True, blank=True)
+    closed_timestamp = models.DateTimeField(null=True, blank=True)
+    canceled_timestamp = models.DateTimeField(null=True, blank=True)
+    withdrawn_timestamp = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField(null=True, blank=True)
     withdraw_reason = models.TextField(null=True, blank=True)
     referral_rejected_reason = models.TextField(null=True, blank=True)
@@ -265,14 +264,14 @@ class LegalMatterIntakeData(models.Model):
 class Task(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
     name = models.CharField(max_length=255)
-    created_timestamp = DateTimeField()
-    last_updated_timestamp = DateTimeField()
-    completed_timestamp = DateTimeField(null=True, blank=True)
+    created_timestamp = models.DateTimeField()
+    last_updated_timestamp = models.DateTimeField()
+    completed_timestamp = models.DateTimeField(null=True, blank=True)
     tracked_minutes = models.IntegerField(db_default=0)
     assigned_to_firm_user_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.RESTRICT, related_name='tasks_assigned_to_firm_user', db_column='assigned_to_firm_user_ref')
     assigned_to_subscriber_ref = models.ForeignKey('Subscriber', null=True, blank=True, on_delete=models.RESTRICT, related_name='tasks_assigned_to_subscriber', db_column='assigned_to_subscriber_ref')
     status = models.CharField(max_length=50)
-    assigned_timestamp = DateTimeField()
+    assigned_timestamp = models.DateTimeField()
     created_by_ref = models.ForeignKey('FirmUser', on_delete=models.RESTRICT, related_name='tasks_created_by', db_column='created_by_ref')
     legal_matter_ref = models.ForeignKey('LegalMatter', on_delete=models.CASCADE, db_column='legal_matter_ref')
     description = models.TextField(null=True, blank=True)
@@ -303,9 +302,9 @@ class CalendarEvent(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
     name = models.CharField(max_length=255)
     status = models.CharField(max_length=50)
-    last_updated_timestamp = DateTimeField()
-    start_time = DateTimeField()
-    end_time = DateTimeField()
+    last_updated_timestamp = models.DateTimeField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     legal_matter_ref = models.ForeignKey('LegalMatter', on_delete=models.CASCADE, db_column='legal_matter_ref')
     description = models.TextField(null=True, blank=True)
     acl = models.JSONField(default=dict, db_default='{}')
@@ -341,8 +340,8 @@ class CalendarEventParticipant(models.Model):
 class Note(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
     note = models.TextField()
-    created_timestamp = DateTimeField()
-    last_updated_timestamp = DateTimeField()
+    created_timestamp = models.DateTimeField()
+    last_updated_timestamp = models.DateTimeField()
     updated_by_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.SET_NULL, related_name='notes_updated_by', db_column='updated_by_ref')
     created_by_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.SET_NULL, related_name='notes_created_by', db_column='created_by_ref')
     legal_matter_ref = models.ForeignKey('LegalMatter', on_delete=models.CASCADE, db_column='legal_matter_ref')
@@ -360,8 +359,8 @@ class Note(models.Model):
 class Document(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
     name = models.CharField(max_length=255)
-    created_timestamp = DateTimeField()
-    updated_timestamp = DateTimeField()
+    created_timestamp = models.DateTimeField()
+    updated_timestamp = models.DateTimeField()
     md5_hash = models.CharField(max_length=32)
     size = models.IntegerField()
     full_path = models.TextField()
@@ -374,7 +373,7 @@ class Document(models.Model):
         db_table = 'documents'
         indexes = [
             GinIndex(fields=['acl'], name='documents_acl_idx'),
-            models.Index(fields=['created_timestamp'], name='created_timestamp_idx'),
+            models.Index(fields=['created_timestamp'], name='docs_created_timestamp_idx'),
             models.Index(fields=['legal_matter_ref'], name='documents_legal_matter_ref_idx'),
         ]
         constraints = [
@@ -401,7 +400,7 @@ class TaskDocument(models.Model):
 # LegalMatterAudit model
 class LegalMatterAudit(models.Model):
     id = models.BigAutoField(primary_key=True)
-    created_timestamp = DateTimeField()
+    created_timestamp = models.DateTimeField()
     details = models.TextField()
     legal_matter_ref = models.ForeignKey('LegalMatter', on_delete=models.CASCADE, db_column='legal_matter_ref')
 
@@ -412,7 +411,7 @@ class LegalMatterAudit(models.Model):
 class PaymentProcessorAccount(models.Model):
     id = models.BigAutoField(primary_key=True)
     email = models.CharField(max_length=255)
-    created = DateTimeField()
+    created = models.DateTimeField()
     details_submitted = models.BooleanField()
     type = models.CharField(max_length=50)
     capabilities_card_payments = models.CharField(max_length=50)
@@ -420,14 +419,14 @@ class PaymentProcessorAccount(models.Model):
     requirements_errors = ArrayField(
         models.TextField(),  # Field type for the array elements
         default=list,  # Python default for empty array
-        db_default="{}::text[]"  # Ensures it generates as text[] with the proper default
+        db_default="{}"  # Ensures it generates as text[] with the proper default
     )
     requirements_pending_verification = ArrayField(
         models.TextField(),  # Field type for the array elements
         default=list,  # Python default for empty array
-        db_default="{}::text[]"  # Ensures it generates as text[] with the proper default
+        db_default="{}"  # Ensures it generates as text[] with the proper default
     )
-    requirements_current_deadline = DateTimeField(null=True, blank=True)
+    requirements_current_deadline = models.DateTimeField(null=True, blank=True)
     requirements_disabled_reason = models.TextField(null=True, blank=True)
     firm_ref = models.ForeignKey('Firm', on_delete=models.CASCADE, db_column='firm_ref')
     payouts_enabled = models.BooleanField()
@@ -446,13 +445,13 @@ class SubscriptionDetail(models.Model):
     id = models.BigAutoField(primary_key=True)
     last_invoice_id = models.CharField(max_length=100)
     last_invoice_status = models.CharField(max_length=50)
-    billing_cycle_anchor = DateTimeField()
-    last_event_timestamp = DateTimeField()
+    billing_cycle_anchor = models.DateTimeField()
+    last_event_timestamp = models.DateTimeField()
     last_event_id = models.CharField(max_length=100)
     subscriber_ref = models.ForeignKey('Subscriber', on_delete=models.CASCADE, db_column='subscriber_ref')
     subscription_status = models.CharField(max_length=50)
     customer_id = models.CharField(max_length=100)
-    current_period_end = DateTimeField()
+    current_period_end = models.DateTimeField()
     _type = models.CharField(max_length=50)
     subscription_id = models.CharField(max_length=100, unique=True)
     acl = models.JSONField(default=dict, db_default='{}')
@@ -515,9 +514,9 @@ class UserMessage(models.Model):
     labels = ArrayField(
         models.TextField(),  # Field type for the array elements
         default=list,  # Python default for empty array
-        db_default="{}::text[]"  # Ensures it generates as text[] with the proper default
+        db_default="{}"  # Ensures it generates as text[] with the proper default
     )
-    created_timestamp = DateTimeField()
+    created_timestamp = models.DateTimeField()
     severity = models.CharField(max_length=50)
     firm_user_ref = models.ForeignKey(
         'FirmUser', on_delete=models.RESTRICT, null=True, blank=True, db_column='firm_user_ref'
