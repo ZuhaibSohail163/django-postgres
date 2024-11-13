@@ -14,9 +14,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            lm_acls = acls["legal_matters"].replace("{subscriber_id}", '01JBF46Q60T3A7VSJ7T2KGWRT2')
-            subscriber_instance = Subscriber.objects.get(id='01JCG3Z954GTYM2MMN5ETG8R6B')
-            lm_kind_instance = LegalMatterKind.objects.get(id='01JCK4NPMTC2G4881V5HTKD4KC')
+            lm_acls = acls["legal_matters"].replace("{subscriber_id}", '01JCKGFF0XAAWTWWCJD4SNMPDR')
+            subscriber_instance = Subscriber.objects.get(id='01JCKGFF0XAAWTWWCJD4SNMPDR')
+            lm_kind_instance = LegalMatterKind.objects.get(id='01JCKGMPWN3D4RK2SNHEWMVGQ8')
             LegalMatter.objects.create(
                 id=generate_ulid(),
                 status='Pending',

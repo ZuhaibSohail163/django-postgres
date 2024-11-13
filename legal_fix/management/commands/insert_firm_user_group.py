@@ -11,8 +11,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            firm_user_instance = FirmUser.objects.get(id='01JCKCAHKRCA1XWWZN76513S85')
-            group_instance = Group.objects.get(id='01JCKBNNXS0R9RM6058BZA5R87')
+            firm_user_instance = FirmUser.objects.get(id='01JCKGJC69XMGCJPKK7ACGZYPN')
+            group_instance = Group.objects.get(id='01JCKGJP1NY3DYWSZ2EAH906MF')
             FirmUserGroup.objects.create(
                 # id=generate_ulid(),
                 firm_user_ref=firm_user_instance,

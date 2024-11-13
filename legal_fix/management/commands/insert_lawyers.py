@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            firm_instance = Firm.objects.get(id='01JCKBXBNXS82BTWWJ5R5BMK6S')
+            firm_instance = Firm.objects.get(id='01JCKGH149S4MFARWT96A3D4X4')
             FirmUser.objects.create(
                 id=generate_ulid(),
                 last_name='Doe',
