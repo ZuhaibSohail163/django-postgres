@@ -1,7 +1,7 @@
 # User ID for whom we are fetching legal matters
 from django.core.management import BaseCommand
 
-from legal_fix.models import FirmUserGroup, LegalMatter
+from django_rdbms.models import FirmUserGroup, LegalMatter
 from django.db.models import Q
 import time
 

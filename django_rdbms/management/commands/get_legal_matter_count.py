@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from legal_fix.models import Subscriber, LegalMatter
+from django_rdbms.models import Subscriber, LegalMatter
 
 
 class Command(BaseCommand):

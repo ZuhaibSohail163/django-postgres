@@ -161,3 +161,24 @@ acls = {
         ]
     })
 }
+
+acls_flat = {
+    "legal_matters": json.dumps({
+        "entity_get": [
+            "user:{subscriber_id}",
+            "group:{group_id}",
+            "user:{lawyer_id}"
+        ],
+        "entity_list": [
+            "user:{subscriber_id}",
+            "group:{group_id}",
+            "user:{lawyer_id}"
+        ],
+        "role_identities": [
+          "legalMatters_owner:user:{subscriber_id}",
+          "legalMatters_viewer:group:{group_id}",
+          "legalMatters_manager:user:{lawyer_id}"
+        ]
+    }),
+}
+

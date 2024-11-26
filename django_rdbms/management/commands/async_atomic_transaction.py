@@ -1,4 +1,4 @@
-from legal_fix.models import FirmGroup, Firm, Group
+from django_rdbms.models import FirmGroup, Firm, Group
 from django.core.management.base import BaseCommand
 from django.db import connection
 from .acls import acls

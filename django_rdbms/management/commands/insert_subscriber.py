@@ -1,4 +1,4 @@
-from legal_fix.models import Subscriber
+from django_rdbms.models import Subscriber
 from django.core.management.base import BaseCommand
 from django.db import connection
 from .acls import acls
@@ -12,11 +12,14 @@ def generate_ulid():
 class Command(BaseCommand):
     help = "Inserts a new subscriber"
 
+    def add_arguments(self, parser):
+        parser.add_argument("subscriber_id", type=str)
+
     def handle(self, *args, **options):
         try:
-            subscriber_acls = acls["subscribers"].replace("{subscriber_id}", '01JBF46Q60T3A7VSJ7T2KGWRT2')
+            subscriber_acls = acls["subscribers"].replace("{subscriber_id}", "01JD0BB5RN4J80W3795V430ZDS")
             Subscriber.objects.create(
-                id=generate_ulid(),
+                id=options['subscriber_id'],
                 last_name='Doe',
                 gender='Male',
                 last_updated_timestamp=timezone.now(),

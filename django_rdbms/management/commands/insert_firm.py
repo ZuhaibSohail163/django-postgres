@@ -1,4 +1,4 @@
-from legal_fix.models import LegalMatter, LegalMatterKind, Subscriber, Group, Firm
+from django_rdbms.models import LegalMatter, LegalMatterKind, Subscriber, Group, Firm
 from django.core.management.base import BaseCommand
 from django.db import connection
 from .acls import acls
@@ -14,10 +14,13 @@ def generate_ulid():
 class Command(BaseCommand):
     help = "Inserts a new Firm"
 
+    def add_arguments(self, parser):
+        parser.add_argument("firm_id", type=str)
+
     def handle(self, *args, **options):
         try:
             Firm.objects.create(
-                id=generate_ulid(),
+                id=options['firm_id'],
                 name='Homer & Sons',
                 state_name='Texas',
                 state_code='TX',

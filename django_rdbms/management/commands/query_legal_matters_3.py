@@ -2,7 +2,7 @@
 from django.core.management import BaseCommand
 from django.forms import BooleanField
 
-from legal_fix.models import FirmUserGroup, LegalMatter
+from django_rdbms.models import FirmUserGroup, LegalMatter
 from django.db.models import Q, Exists, OuterRef, Subquery
 from django.contrib.postgres.aggregates import ArrayAgg
 

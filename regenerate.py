@@ -9,6 +9,8 @@ django.setup()
 
 # Invoke `makemigrations`
 try:
-    call_command('query_legal_matters_3')
+    call_command('drop_db')
+    call_command('makemigrations', 'django_rdbms')
+    call_command('migrate')
 except Exception as e:
     print(f"Error running makemigrations: {e}")
