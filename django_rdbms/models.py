@@ -5,7 +5,7 @@ from django.contrib.postgres.indexes import GinIndex, OpClass
 
 # Subscriber model
 class Subscriber(models.Model):
-    id = models.CharField(max_length=26, primary_key=True)
+    id = models.CharField(max_length=256, primary_key=True)
     last_name = models.CharField(max_length=255)
     gender = models.CharField(max_length=50, null=True, blank=True)
     last_updated_timestamp = models.DateTimeField()
@@ -20,6 +20,12 @@ class Subscriber(models.Model):
     first_name = models.CharField(max_length=255)
     date_of_birth = models.DateField(null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
+    state_code = models.CharField(max_length=255, null=False, blank=False)
+    state_name = models.CharField(max_length=255, null=False, blank=False)
+    city = models.CharField(max_length=255, null=False, blank=False)
+    apt_number = models.CharField(max_length=255, null=True, blank=True)
+    street = models.CharField(max_length=255, null=True, blank=True)
+    zip_code = models.CharField(max_length=255, null=True, blank=True)
     acl = models.JSONField(default=dict, db_default='{}')
     acl_flat = models.JSONField(default=dict, db_default='{}')
 
@@ -79,6 +85,11 @@ class Firm(models.Model):
     email = models.CharField(max_length=255, unique=True)
     address = models.CharField(max_length=255)
     phone = models.CharField(max_length=50, null=True, blank=True)
+    practice_states = ArrayField(
+        models.TextField(),
+        blank=True,  # Optional: allows the array to be empty
+        null=True,  # Optional: allows the array to be null
+    )
     acl = models.JSONField(default=dict, db_default='{}')
     acl_flat = models.JSONField(default=dict, db_default='{}')
 
@@ -123,6 +134,7 @@ class FirmUser(models.Model):
         blank=True,  # Optional: allows the array to be empty
         null=False    # Optional: allows the array to be null
     )
+
     phone = models.CharField(max_length=50, null=True, blank=True)
     first_name = models.CharField(max_length=255)
     firm_ref = models.ForeignKey('Firm', on_delete=models.RESTRICT, db_column='firm_ref')
@@ -527,7 +539,7 @@ class TaskDocument(models.Model):
 
 # LegalMatterAudit model
 class LegalMatterAudit(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.CharField(max_length=26, primary_key=True)
     created_timestamp = models.DateTimeField()
     details = models.TextField()
     legal_matter_ref = models.ForeignKey('LegalMatter', on_delete=models.CASCADE, db_column='legal_matter_ref')
@@ -537,7 +549,7 @@ class LegalMatterAudit(models.Model):
 
 # PaymentProcessorAccount model
 class PaymentProcessorAccount(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.CharField(max_length=26, primary_key=True)
     email = models.CharField(max_length=255)
     created = models.DateTimeField()
     details_submitted = models.BooleanField()
@@ -582,7 +594,7 @@ class PaymentProcessorAccount(models.Model):
 
 # SubscriptionDetail model
 class SubscriptionDetail(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.CharField(max_length=26, primary_key=True)
     last_invoice_id = models.CharField(max_length=100)
     last_invoice_status = models.CharField(max_length=50)
     billing_cycle_anchor = models.DateTimeField()
@@ -630,7 +642,7 @@ class SubscriptionProduct(models.Model):
 
 # USCity model
 class USCity(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.CharField(max_length=26, primary_key=True)
     city = models.CharField(max_length=100)
     state_name = models.CharField(max_length=100)
     city_lower = models.CharField(max_length=100)
@@ -642,8 +654,8 @@ class USCity(models.Model):
 
 # USCounty model
 class USCounty(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    county_fips = models.CharField(max_length=5, unique=True)
+    id = models.CharField(max_length=26, primary_key=True)
+    county_fips = models.CharField(max_length=5)
     state_name = models.CharField(max_length=100)
     county_name = models.CharField(max_length=100)
     state_code = models.CharField(max_length=2)
@@ -653,16 +665,16 @@ class USCounty(models.Model):
 
 # USState model
 class USState(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    state_name = models.CharField(max_length=100, unique=True)
-    state_code = models.CharField(max_length=2, unique=True)
+    id = models.CharField(max_length=26, primary_key=True)
+    state_name = models.CharField(max_length=100)
+    state_code = models.CharField(max_length=2)
 
     class Meta:
         db_table = 'us_states'
 
 # UserMessage model
 class UserMessage(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.CharField(max_length=26, primary_key=True)
     labels = ArrayField(
         models.TextField(),  # Field type for the array elements
         default=list,  # Python default for empty array

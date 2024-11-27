@@ -18,12 +18,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             subscriber_acls = acls["subscribers"].replace("{subscriber_id}", "01JD0BB5RN4J80W3795V430ZDS")
-            Subscriber.objects.create(
+            sub = Subscriber.objects.create(
                 id=options['subscriber_id'],
                 last_name='Doe',
                 gender='Male',
                 last_updated_timestamp=timezone.now(),
-                email='john.doe@example.com',
+                email='john.doe1@example.com',
                 subscription_active=True,
                 roles=['subscriber', 'editor'],
                 phone='123-456-7890',
