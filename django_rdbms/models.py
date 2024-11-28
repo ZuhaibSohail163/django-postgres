@@ -1,11 +1,11 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.indexes import GinIndex, OpClass
 
 
 # Subscriber model
 class Subscriber(models.Model):
-    id = models.CharField(max_length=26, primary_key=True)
+    id = models.CharField(max_length=256, primary_key=True)
     last_name = models.CharField(max_length=255)
     gender = models.CharField(max_length=50, null=True, blank=True)
     last_updated_timestamp = models.DateTimeField()
@@ -20,12 +20,30 @@ class Subscriber(models.Model):
     first_name = models.CharField(max_length=255)
     date_of_birth = models.DateField(null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
+    state_code = models.CharField(max_length=255, null=False, blank=False)
+    state_name = models.CharField(max_length=255, null=False, blank=False)
+    city = models.CharField(max_length=255, null=False, blank=False)
+    apt_number = models.CharField(max_length=255, null=True, blank=True)
+    street = models.CharField(max_length=255, null=True, blank=True)
+    zip_code = models.CharField(max_length=255, null=True, blank=True)
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'subscribers'
         indexes = [
-            GinIndex(fields=['acl'], name='subscribers_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="subscribers_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="subscribers_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="subscribers_acl_roles_idx",
+            ),
         ]
 
 # Group model
@@ -39,11 +57,23 @@ class Group(models.Model):
     )
     name = models.CharField(max_length=255)
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'groups'
         indexes = [
-            GinIndex(fields=['acl'], name='groups_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="groups_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="groups_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="groups_acl_roles_idx",
+            ),
         ]
 
 # Firm model
@@ -55,12 +85,29 @@ class Firm(models.Model):
     email = models.CharField(max_length=255, unique=True)
     address = models.CharField(max_length=255)
     phone = models.CharField(max_length=50, null=True, blank=True)
+    practice_states = ArrayField(
+        models.TextField(),
+        blank=True,  # Optional: allows the array to be empty
+        null=True,  # Optional: allows the array to be null
+    )
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'firms'
         indexes = [
-            GinIndex(fields=['acl'], name='firms_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="firms_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="firms_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="firms_acl_roles_idx",
+            ),
         ]
 
 # FirmGroup model
@@ -72,7 +119,6 @@ class FirmGroup(models.Model):
         db_table = 'firm_groups'
         constraints = [
             models.UniqueConstraint(fields=['firm_ref', 'group_ref'], name='firm_group_pk'),
-            
         ]
 
 # FirmUser model
@@ -88,16 +134,29 @@ class FirmUser(models.Model):
         blank=True,  # Optional: allows the array to be empty
         null=False    # Optional: allows the array to be null
     )
+
     phone = models.CharField(max_length=50, null=True, blank=True)
     first_name = models.CharField(max_length=255)
     firm_ref = models.ForeignKey('Firm', on_delete=models.RESTRICT, db_column='firm_ref')
     _type = models.CharField(max_length=50)
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'firm_users'
         indexes = [
-            GinIndex(fields=['acl'], name='firm_users_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="firm_users_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="firm_users_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="firm_users_acl_roles_idx",
+            ),
         ]
         constraints = [
             models.CheckConstraint(
@@ -159,11 +218,23 @@ class Invite(models.Model):
     withdrawn_timestamp = models.DateTimeField(null=True, blank=True)
     withdrawn_reason = models.TextField(null=True, blank=True)
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'invites'
         indexes = [
-            GinIndex(fields=['acl'], name='invites_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="invites_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="invites_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="invites_acl_roles_idx",
+            ),
         ]
         constraints = [
             models.CheckConstraint(
@@ -182,9 +253,6 @@ class IntakeForm(models.Model):
 
     class Meta:
         db_table = 'intake_forms'
-        indexes = [
-            GinIndex(fields=['data'], name='intake_forms_data_idx'),
-        ]
 
 # CheckoutSession model
 class CheckoutSession(models.Model):
@@ -196,11 +264,23 @@ class CheckoutSession(models.Model):
     url = models.TextField()
     subscriber_ref = models.ForeignKey('Subscriber', on_delete=models.CASCADE, db_column='subscriber_ref')
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'checkout_sessions'
         indexes = [
-            GinIndex(fields=['acl'], name='checkout_sessions_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="checkout_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="checkout_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="checkout_acl_roles_idx",
+            ),
         ]
 
 # LegalMatterKind model
@@ -236,17 +316,29 @@ class LegalMatter(models.Model):
     rejection_reason = models.TextField(null=True, blank=True)
     withdraw_reason = models.TextField(null=True, blank=True)
     referral_rejected_reason = models.TextField(null=True, blank=True)
-    rating = models.IntegerField(db_default=0)
+    rating = models.IntegerField(db_default=0, null=True, blank=True)
     kind_ref = models.ForeignKey('LegalMatterKind', on_delete=models.RESTRICT, db_column='kind_ref')
     subscriber_ref = models.ForeignKey('Subscriber', on_delete=models.RESTRICT, db_column='subscriber_ref')
     assigned_lawyer_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.RESTRICT, db_column='assigned_lawyer_ref')
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'legal_matters'
         indexes = [
-            GinIndex(fields=['acl'], name='legal_matters_acl_idx'),
             models.Index(fields=['created_timestamp'], name='lm_created_timestamp_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="lm_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="lm_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="lm_acl_roles_idx",
+            ),
         ]
 
 # LegalMatterIntakeData model
@@ -267,7 +359,7 @@ class Task(models.Model):
     created_timestamp = models.DateTimeField()
     last_updated_timestamp = models.DateTimeField()
     completed_timestamp = models.DateTimeField(null=True, blank=True)
-    tracked_minutes = models.IntegerField(db_default=0)
+    tracked_minutes = models.IntegerField(db_default=0, null=True, blank=True)
     assigned_to_firm_user_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.RESTRICT, related_name='tasks_assigned_to_firm_user', db_column='assigned_to_firm_user_ref')
     assigned_to_subscriber_ref = models.ForeignKey('Subscriber', null=True, blank=True, on_delete=models.RESTRICT, related_name='tasks_assigned_to_subscriber', db_column='assigned_to_subscriber_ref')
     status = models.CharField(max_length=50)
@@ -277,13 +369,25 @@ class Task(models.Model):
     description = models.TextField(null=True, blank=True)
     charge_type = models.CharField(max_length=20, null=True, blank=True)
     charge_reason = models.TextField(null=True, blank=True)
-    charge_amount = models.DecimalField(max_digits=10, decimal_places=2, db_default=0)
+    charge_amount = models.DecimalField(max_digits=10, decimal_places=2, db_default=0,null=True, blank=True)
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'tasks'
         indexes = [
-            GinIndex(fields=['acl'], name='tasks_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="tasks_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="tasks_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="tasks_acl_roles_idx",
+            ),
             models.Index(fields=['created_timestamp'], name='tasks_created_timestamp_idx'),
             models.Index(fields=['legal_matter_ref'], name='tasks_legal_matter_ref_idx'),
         ]
@@ -308,11 +412,23 @@ class CalendarEvent(models.Model):
     legal_matter_ref = models.ForeignKey('LegalMatter', on_delete=models.CASCADE, db_column='legal_matter_ref')
     description = models.TextField(null=True, blank=True)
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'calendar_events'
         indexes = [
-            GinIndex(fields=['acl'], name='calendar_events_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="events_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="events_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="events_acl_roles_idx",
+            ),
             models.Index(fields=['last_updated_timestamp'], name='last_updated_timestamp_idx'),
             models.Index(fields=['legal_matter_ref'], name='legal_matter_ref_idx'),
         ]
@@ -346,11 +462,23 @@ class Note(models.Model):
     created_by_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.SET_NULL, related_name='notes_created_by', db_column='created_by_ref')
     legal_matter_ref = models.ForeignKey('LegalMatter', on_delete=models.CASCADE, db_column='legal_matter_ref')
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'notes'
         indexes = [
-            GinIndex(fields=['acl'], name='notes_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="notes_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="notes_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="notes_acl_roles_idx",
+            ),
             models.Index(fields=['created_timestamp'], name='notes_created_timestamp_idx'),
             models.Index(fields=['legal_matter_ref'], name='notes_legal_matter_ref_idx'),
         ]
@@ -368,11 +496,23 @@ class Document(models.Model):
     created_by_subscriber_ref = models.ForeignKey('Subscriber', null=True, blank=True, on_delete=models.RESTRICT, related_name='documents_created_by_subscriber', db_column='created_by_subscriber_ref')
     legal_matter_ref = models.ForeignKey('LegalMatter', on_delete=models.CASCADE, db_column='legal_matter_ref')
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'documents'
         indexes = [
-            GinIndex(fields=['acl'], name='documents_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="docs_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="docs_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="docs_acl_roles_idx",
+            ),
             models.Index(fields=['created_timestamp'], name='docs_created_timestamp_idx'),
             models.Index(fields=['legal_matter_ref'], name='documents_legal_matter_ref_idx'),
         ]
@@ -399,7 +539,7 @@ class TaskDocument(models.Model):
 
 # LegalMatterAudit model
 class LegalMatterAudit(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.CharField(max_length=26, primary_key=True)
     created_timestamp = models.DateTimeField()
     details = models.TextField()
     legal_matter_ref = models.ForeignKey('LegalMatter', on_delete=models.CASCADE, db_column='legal_matter_ref')
@@ -407,42 +547,61 @@ class LegalMatterAudit(models.Model):
     class Meta:
         db_table = 'legal_matter_audit'
 
-# PaymentProcessorAccount model
-class PaymentProcessorAccount(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    email = models.CharField(max_length=255)
-    created = models.DateTimeField()
-    details_submitted = models.BooleanField()
-    type = models.CharField(max_length=50)
-    capabilities_card_payments = models.CharField(max_length=50)
-    capabilities_transfers = models.CharField(max_length=50)
+# StripeConnectedAccount model
+class StripeConnectedAccount(models.Model):
+    id = models.CharField(max_length=26, primary_key=True)
+    account_id = models.TextField()
+    email = models.TextField(null=True,blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    details_submitted=models.BooleanField(
+        default=False,
+    )
+    charges_enabled= models.BooleanField(
+        default=False,
+    )
+    payouts_enabled= models.BooleanField(
+        default=False,
+    )
+    type = models.TextField(max_length=50)
+    capabilities_card_payments = models.TextField()
+    capabilities_transfers = models.TextField()
     requirements_errors = ArrayField(
-        models.TextField(),  # Field type for the array elements
-        default=list,  # Python default for empty array
-        db_default="{}"  # Ensures it generates as text[] with the proper default
+        models.TextField(),
+        default=list,
+        db_default="{}"
     )
     requirements_pending_verification = ArrayField(
-        models.TextField(),  # Field type for the array elements
-        default=list,  # Python default for empty array
-        db_default="{}"  # Ensures it generates as text[] with the proper default
+        models.TextField(),
+        default=list,
+        db_default="{}"
     )
     requirements_current_deadline = models.DateTimeField(null=True, blank=True)
     requirements_disabled_reason = models.TextField(null=True, blank=True)
-    firm_ref = models.ForeignKey('Firm', on_delete=models.CASCADE, db_column='firm_ref')
-    payouts_enabled = models.BooleanField()
-    charges_enabled = models.BooleanField()
+    firm_ref = models.ForeignKey('Firm', null=True, blank=True, on_delete=models.CASCADE, db_column='firm_ref')
     _type = models.CharField(max_length=50)
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'payment_processor_accounts'
         indexes = [
-            GinIndex(fields=['acl'], name='payment_processor_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="pma_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="pma_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="pma_acl_roles_idx",
+            ),
         ]
 
 # SubscriptionDetail model
 class SubscriptionDetail(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.CharField(max_length=26, primary_key=True)
     last_invoice_id = models.CharField(max_length=100)
     last_invoice_status = models.CharField(max_length=50)
     billing_cycle_anchor = models.DateTimeField()
@@ -455,16 +614,29 @@ class SubscriptionDetail(models.Model):
     _type = models.CharField(max_length=50)
     subscription_id = models.CharField(max_length=100, unique=True)
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'subscription_details'
         indexes = [
-            GinIndex(fields=['acl'], name='subscription_details_acl_idx'),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="sub_details_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="sub_details_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="sub_details_acl_roles_idx",
+            ),
         ]
 
 # SubscriptionProduct model
 class SubscriptionProduct(models.Model):
     id = models.BigAutoField(primary_key=True)
+    product_id = models.CharField(max_length=100)
     name = models.CharField(max_length=255)
     kind = models.CharField(max_length=20)
     price_id = models.CharField(max_length=255)
@@ -478,7 +650,7 @@ class SubscriptionProduct(models.Model):
 
 # USCity model
 class USCity(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.CharField(max_length=26, primary_key=True)
     city = models.CharField(max_length=100)
     state_name = models.CharField(max_length=100)
     city_lower = models.CharField(max_length=100)
@@ -490,8 +662,8 @@ class USCity(models.Model):
 
 # USCounty model
 class USCounty(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    county_fips = models.CharField(max_length=5, unique=True)
+    id = models.CharField(max_length=26, primary_key=True)
+    county_fips = models.CharField(max_length=5)
     state_name = models.CharField(max_length=100)
     county_name = models.CharField(max_length=100)
     state_code = models.CharField(max_length=2)
@@ -501,16 +673,16 @@ class USCounty(models.Model):
 
 # USState model
 class USState(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    state_name = models.CharField(max_length=100, unique=True)
-    state_code = models.CharField(max_length=2, unique=True)
+    id = models.CharField(max_length=26, primary_key=True)
+    state_name = models.CharField(max_length=100)
+    state_code = models.CharField(max_length=2)
 
     class Meta:
         db_table = 'us_states'
 
 # UserMessage model
 class UserMessage(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.CharField(max_length=26, primary_key=True)
     labels = ArrayField(
         models.TextField(),  # Field type for the array elements
         default=list,  # Python default for empty array
@@ -526,6 +698,7 @@ class UserMessage(models.Model):
     )
     message = models.TextField()
     acl = models.JSONField(default=dict, db_default='{}')
+    acl_flat = models.JSONField(default=dict, db_default='{}')
 
     class Meta:
         db_table = 'user_messages'
@@ -537,4 +710,18 @@ class UserMessage(models.Model):
                 ),
                 name='user_messages_check'
             )
+        ]
+        indexes = [
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_get"), name="jsonb_path_ops"),
+                name="messages_acl_get_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__entity_list"), name="jsonb_path_ops"),
+                name="messages_acl_list_idx",
+            ),
+            GinIndex(
+                OpClass(models.F("acl_flat__role_identities"), name="jsonb_path_ops"),
+                name="messages_acl_roles_idx",
+            ),
         ]

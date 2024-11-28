@@ -13,6 +13,6 @@ def generate_ulid():
 
 # Invoke `makemigrations`
 try:
-    call_command('insert_subscriber', generate_ulid())
+    call_command('insert_stripe_connected_account', generate_ulid())
 except Exception as e:
     print(f"Error running makemigrations: {e}")
