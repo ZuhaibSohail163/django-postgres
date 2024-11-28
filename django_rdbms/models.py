@@ -316,7 +316,7 @@ class LegalMatter(models.Model):
     rejection_reason = models.TextField(null=True, blank=True)
     withdraw_reason = models.TextField(null=True, blank=True)
     referral_rejected_reason = models.TextField(null=True, blank=True)
-    rating = models.IntegerField(db_default=0)
+    rating = models.IntegerField(db_default=0, null=True, blank=True)
     kind_ref = models.ForeignKey('LegalMatterKind', on_delete=models.RESTRICT, db_column='kind_ref')
     subscriber_ref = models.ForeignKey('Subscriber', on_delete=models.RESTRICT, db_column='subscriber_ref')
     assigned_lawyer_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.RESTRICT, db_column='assigned_lawyer_ref')
@@ -359,7 +359,7 @@ class Task(models.Model):
     created_timestamp = models.DateTimeField()
     last_updated_timestamp = models.DateTimeField()
     completed_timestamp = models.DateTimeField(null=True, blank=True)
-    tracked_minutes = models.IntegerField(db_default=0)
+    tracked_minutes = models.IntegerField(db_default=0, null=True, blank=True)
     assigned_to_firm_user_ref = models.ForeignKey('FirmUser', null=True, blank=True, on_delete=models.RESTRICT, related_name='tasks_assigned_to_firm_user', db_column='assigned_to_firm_user_ref')
     assigned_to_subscriber_ref = models.ForeignKey('Subscriber', null=True, blank=True, on_delete=models.RESTRICT, related_name='tasks_assigned_to_subscriber', db_column='assigned_to_subscriber_ref')
     status = models.CharField(max_length=50)
@@ -369,7 +369,7 @@ class Task(models.Model):
     description = models.TextField(null=True, blank=True)
     charge_type = models.CharField(max_length=20, null=True, blank=True)
     charge_reason = models.TextField(null=True, blank=True)
-    charge_amount = models.DecimalField(max_digits=10, decimal_places=2, db_default=0)
+    charge_amount = models.DecimalField(max_digits=10, decimal_places=2, db_default=0,null=True, blank=True)
     acl = models.JSONField(default=dict, db_default='{}')
     acl_flat = models.JSONField(default=dict, db_default='{}')
 
@@ -547,30 +547,37 @@ class LegalMatterAudit(models.Model):
     class Meta:
         db_table = 'legal_matter_audit'
 
-# PaymentProcessorAccount model
-class PaymentProcessorAccount(models.Model):
+# StripeConnectedAccount model
+class StripeConnectedAccount(models.Model):
     id = models.CharField(max_length=26, primary_key=True)
-    email = models.CharField(max_length=255)
-    created = models.DateTimeField()
-    details_submitted = models.BooleanField()
-    type = models.CharField(max_length=50)
-    capabilities_card_payments = models.CharField(max_length=50)
-    capabilities_transfers = models.CharField(max_length=50)
+    account_id = models.TextField()
+    email = models.TextField(null=True,blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    details_submitted=models.BooleanField(
+        default=False,
+    )
+    charges_enabled= models.BooleanField(
+        default=False,
+    )
+    payouts_enabled= models.BooleanField(
+        default=False,
+    )
+    type = models.TextField(max_length=50)
+    capabilities_card_payments = models.TextField()
+    capabilities_transfers = models.TextField()
     requirements_errors = ArrayField(
-        models.TextField(),  # Field type for the array elements
-        default=list,  # Python default for empty array
-        db_default="{}"  # Ensures it generates as text[] with the proper default
+        models.TextField(),
+        default=list,
+        db_default="{}"
     )
     requirements_pending_verification = ArrayField(
-        models.TextField(),  # Field type for the array elements
-        default=list,  # Python default for empty array
-        db_default="{}"  # Ensures it generates as text[] with the proper default
+        models.TextField(),
+        default=list,
+        db_default="{}"
     )
     requirements_current_deadline = models.DateTimeField(null=True, blank=True)
     requirements_disabled_reason = models.TextField(null=True, blank=True)
-    firm_ref = models.ForeignKey('Firm', on_delete=models.CASCADE, db_column='firm_ref')
-    payouts_enabled = models.BooleanField()
-    charges_enabled = models.BooleanField()
+    firm_ref = models.ForeignKey('Firm', null=True, blank=True, on_delete=models.CASCADE, db_column='firm_ref')
     _type = models.CharField(max_length=50)
     acl = models.JSONField(default=dict, db_default='{}')
     acl_flat = models.JSONField(default=dict, db_default='{}')
@@ -629,6 +636,7 @@ class SubscriptionDetail(models.Model):
 # SubscriptionProduct model
 class SubscriptionProduct(models.Model):
     id = models.BigAutoField(primary_key=True)
+    product_id = models.CharField(max_length=100)
     name = models.CharField(max_length=255)
     kind = models.CharField(max_length=20)
     price_id = models.CharField(max_length=255)
